@@ -366,7 +366,7 @@
     <script>
         // Configuration - UPDATE THIS WITH YOUR BACKEND URL
         const API_URL = 'https://prisik-backend.onrender.com/chat';
-';
+             
         
         let messages = [];
         let chatHistory = {}; // Store all chats by ID
@@ -396,7 +396,7 @@
                  <div class="empty-state" id="emptyState">
                     <h1>Welcome to Prisik!</h1>
                  </div>
-    `;
+                `;
             document.getElementById('messageInput').value = '';
             
             // Update active state in sidebar
@@ -515,8 +515,8 @@
                     <img src="/Prisik-logo2.png" alt="Prisik AI">
                  </div>
                 <div class="message-content">${formatMessage(content)}</div>
-        `;
-    }
+               `;
+            }
             
             container.appendChild(messageDiv);
             container.scrollTop = container.scrollHeight;
@@ -663,6 +663,8 @@
             this.style.height = 'auto';
             this.style.height = Math.min(this.scrollHeight, 200) + 'px';
         });
+        // Initialize app on page load
+        window.addEventListener('DOMContentLoaded', initializeApp);
     </script>
 </body>
 </html>
