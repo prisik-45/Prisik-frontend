@@ -364,13 +364,54 @@
     </div>
 
     <script>
-        // Configuration - UPDATE THIS WITH YOUR BACKEND URL
+    
         const API_URL = 'https://prisik-backend.onrender.com/chat';
-             
         
         let messages = [];
-        let chatHistory = {}; // Store all chats by ID
+        let chatHistory = {};
         let currentChatId = null;
+
+        // Load chat history from localStorage on page load
+        function initializeApp() {
+            const savedHistory = localStorage.getItem('prisikChatHistory');
+            const savedCurrentChatId = localStorage.getItem('prisikCurrentChatId');
+            
+            if (savedHistory) {
+                chatHistory = JSON.parse(savedHistory);
+                console.log('Loaded chat history:', chatHistory);
+                renderChatHistory();
+            }
+            
+            if (savedCurrentChatId && chatHistory[savedCurrentChatId]) {
+                loadChat(savedCurrentChatId);
+            }
+        }
+
+        function saveToLocalStorage() {
+            localStorage.setItem('prisikChatHistory', JSON.stringify(chatHistory));
+            localStorage.setItem('prisikCurrentChatId', currentChatId);
+            console.log('Saved to localStorage:', chatHistory);
+        }
+
+        function renderChatHistory() {
+            const historyContainer = document.getElementById('chatHistory');
+            historyContainer.innerHTML = '';
+            
+            const sortedChatIds = Object.keys(chatHistory).sort((a, b) => b - a);
+            
+            sortedChatIds.forEach(chatId => {
+                const chat = chatHistory[chatId];
+                const chatItem = document.createElement('div');
+                chatItem.className = 'chat-item';
+                if (chatId == currentChatId) {
+                    chatItem.classList.add('active');
+                }
+                chatItem.id = `chat-${chatId}`;
+                chatItem.textContent = chat.title || 'New Chat';
+                chatItem.onclick = () => loadChat(chatId);
+                historyContainer.appendChild(chatItem);
+            });
+        }
 
         function handleKeyPress(e) {
             if (e.key === 'Enter' && !e.shiftKey) {
@@ -380,26 +421,25 @@
         }
 
         function newChat() {
-            // Save current chat before creating new one
             if (currentChatId && messages.length > 0) {
                 chatHistory[currentChatId] = {
                     messages: [...messages],
-                    title: chatHistory[currentChatId]?.title || messages[0]?.content.substring(0, 30)
+                    title: chatHistory[currentChatId]?.title || 'New Chat'
                 };
+                saveToLocalStorage();
             }
 
             messages = [];
-            currentChatId = Date.now();
-            // Clear messages container and show empty state
+            currentChatId = null;
+            
             const container = document.getElementById('messagesContainer');
             container.innerHTML = `
-                 <div class="empty-state" id="emptyState">
+                <div class="empty-state" id="emptyState">
                     <h1>Welcome to Prisik!</h1>
-                 </div>
-                `;
-            document.getElementById('messageInput').value = '';
+                </div>
+            `;
             
-            // Update active state in sidebar
+            document.getElementById('messageInput').value = '';
             updateSidebarActiveState();
         }
 
@@ -409,38 +449,34 @@
             
             if (!message) return;
 
-            // Create new chat ID if this is the first message
             if (!currentChatId) {
-               currentChatId = Date.now();
+                currentChatId = Date.now().toString();
             }
 
-            // Hide empty state
             const emptyState = document.getElementById('emptyState');
-            if (emptyState) { emptyState.remove(); }
+            if (emptyState) {
+                emptyState.remove();
+            }
 
-            // Add user message to display
             const messageDiv = document.createElement('div');
             messageDiv.className = 'message user';
             messageDiv.innerHTML = `
-               <div class="message-content">${formatMessage(message)}</div>
-          `;
+                <div class="message-content">${formatMessage(message)}</div>
+            `;
             document.getElementById('messagesContainer').appendChild(messageDiv);
-
-            // Add user message
+            document.getElementById('messagesContainer').scrollTop = document.getElementById('messagesContainer').scrollHeight;
+            
             messages.push({ role: 'user', content: message });
             
             input.value = '';
             input.style.height = 'auto';
 
-            // Disable input
             input.disabled = true;
             document.getElementById('sendBtn').disabled = true;
 
-            // Show typing indicator
             const typingId = addTypingIndicator();
 
             try {
-                // Call your FastAPI backend
                 const response = await fetch(API_URL, {
                     method: 'POST',
                     headers: {
@@ -448,7 +484,7 @@
                     },
                     body: JSON.stringify({
                         msg: message,
-                        model: "openai/gpt-oss-20b",  // Change this to your Groq model
+                        model: "openai/gpt-oss-20b",
                         system: "You are a helpful assistant.",
                         stream: false
                     })
@@ -456,29 +492,32 @@
 
                 const data = await response.json();
                 
-                // Remove typing indicator
                 removeTypingIndicator(typingId);
                 
-                // Add assistant message to display
                 const assistantMessage = data.response || data.message || 'Sorry, I could not process your request.';
                 const assistantDiv = document.createElement('div');
                 assistantDiv.className = 'message assistant';
                 assistantDiv.innerHTML = `
                     <div class="avatar assistant">
-                       <img src="/Prisik-logo2.png" alt="Prisik AI">
+                        <img src="/Prisik-logo2.png" alt="Prisik AI">
                     </div>
                     <div class="message-content">${formatMessage(assistantMessage)}</div>
                 `;
                 document.getElementById('messagesContainer').appendChild(assistantDiv);
-        
-                // Add to messages array
+                document.getElementById('messagesContainer').scrollTop = document.getElementById('messagesContainer').scrollHeight;
+                
                 messages.push({ role: 'assistant', content: assistantMessage });
 
-                // Update chat history with the first user message as title
-                updateChatHistory(messages.find(m => m.role === 'user')?.content || message);
-
-                // Scroll to bottom
-                document.getElementById('messagesContainer').scrollTop = document.getElementById('messagesContainer').scrollHeight;
+                const firstUserMessage = messages.find(m => m.role === 'user')?.content || message;
+                const chatTitle = firstUserMessage.substring(0, 50) + (firstUserMessage.length > 50 ? '...' : '');
+                
+                chatHistory[currentChatId] = {
+                    messages: [...messages],
+                    title: chatTitle
+                };
+                
+                saveToLocalStorage();
+                renderChatHistory();
 
             } catch (error) {
                 removeTypingIndicator(typingId);
@@ -486,46 +525,20 @@
                 errorDiv.className = 'message assistant';
                 errorDiv.innerHTML = `
                     <div class="avatar assistant">
-                         <img src="/Prisik-logo2.png" alt="Prisik AI">
+                        <img src="/Prisik-logo2.png" alt="Prisik AI">
                     </div>
-                    <div class="message-content">Error: Could not connect to the server. Please check your backend is running.</div>
+                    <div class="message-content">Error: Could not connect to the server. ${error.message}</div>
                 `;
                 document.getElementById('messagesContainer').appendChild(errorDiv);
                 console.error('Error:', error);
             }
 
-            // Re-enable input
             input.disabled = false;
             document.getElementById('sendBtn').disabled = false;
             input.focus();
         }
 
-        function addMessage(role, content) {
-            const container = document.getElementById('messagesContainer');
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${role}`;
-            
-           if (role === 'user') {
-        messageDiv.innerHTML = `
-            <div class="message-content">${formatMessage(content)}</div>
-        `;
-           } else {
-               messageDiv.innerHTML = `
-                 <div class="avatar ${role}">
-                    <img src="/Prisik-logo2.png" alt="Prisik AI">
-                 </div>
-                <div class="message-content">${formatMessage(content)}</div>
-               `;
-            }
-            
-            container.appendChild(messageDiv);
-            container.scrollTop = container.scrollHeight;
-            
-            // Don't update messages array here - it's handled in sendMessage
-        }
-
         function formatMessage(text) {
-            // Basic markdown-like formatting
             text = text.replace(/```(\w+)?\n([\s\S]+?)```/g, '<pre><code>$2</code></pre>');
             text = text.replace(/`([^`]+)`/g, '<code>$1</code>');
             text = text.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
@@ -542,7 +555,7 @@
             
             typingDiv.innerHTML = `
                 <div class="avatar assistant">
-                    <img src="/Prisik-logo2.png" alt="AI Avatar">
+                    <img src="/Prisik-logo2.png" alt="Prisik AI">
                 </div>
                 <div class="message-content">
                     <div class="typing-indicator active">
@@ -563,95 +576,58 @@
             if (element) element.remove();
         }
 
-        function updateChatHistory(message) {
-            if (!currentChatId) {
-                currentChatId = Date.now();
-            }
-
-            const historyContainer = document.getElementById('chatHistory');
-            const existingChat = document.getElementById(`chat-${currentChatId}`);
-            
-            // Generate a meaningful title from the first user message
-            const chatTitle = message.substring(0, 40) + (message.length > 40 ? '...' : '');
-            
-            if (!existingChat) {
-                const chatItem = document.createElement('div');
-                chatItem.className = 'chat-item active';
-                chatItem.id = `chat-${currentChatId}`;
-                chatItem.textContent = chatTitle;
-                chatItem.onclick = () => loadChat(currentChatId);
-                historyContainer.insertBefore(chatItem, historyContainer.firstChild);
-                
-                // Store chat data
-                chatHistory[currentChatId] = {
-                    messages: [...messages],
-                    title: chatTitle
-                };
-                // Update active state
-                 updateSidebarActiveState();
-            } else {
-                  // Update existing chat data but keep the original title
-                   chatHistory[currentChatId].messages = [...messages];
-            }
-        }
-
         function loadChat(chatId) {
-            // Save current chat before switching
-            if (currentChatId && messages.length > 0) {
+            if (currentChatId && currentChatId !== chatId && messages.length > 0) {
                 chatHistory[currentChatId] = {
                     messages: [...messages],
                     title: chatHistory[currentChatId]?.title || 'New Chat'
                 };
+                saveToLocalStorage();
             }
 
-            // Load selected chat
             currentChatId = chatId;
             const chat = chatHistory[chatId];
+            
+            console.log('Loading chat:', chatId, chat);
             
             if (chat && chat.messages && chat.messages.length > 0) {
                 messages = [...chat.messages];
                 
-                // Clear and rebuild messages container
                 const container = document.getElementById('messagesContainer');
                 container.innerHTML = '';
                 
-                
-                // Render all messages
                 messages.forEach(msg => {
-                     const messageDiv = document.createElement('div');
-                     messageDiv.className = `message ${msg.role}`;
-               
-                     if (msg.role === 'user') {
-                         messageDiv.innerHTML = `
-                           <div class="message-content">${formatMessage(msg.content)}</div>
-                   `;
-                     } else {
-                         messageDiv.innerHTML = `
+                    const messageDiv = document.createElement('div');
+                    messageDiv.className = `message ${msg.role}`;
+                    
+                    if (msg.role === 'user') {
+                        messageDiv.innerHTML = `
+                            <div class="message-content">${formatMessage(msg.content)}</div>
+                        `;
+                    } else {
+                        messageDiv.innerHTML = `
                             <div class="avatar ${msg.role}">
-                               <img src="/Prisik-logo2.png" alt="Prisik AI">
+                                <img src="/Prisik-logo2.png" alt="Prisik AI">
                             </div>
                             <div class="message-content">${formatMessage(msg.content)}</div>
                         `;
-                }
-            
-                     container.appendChild(messageDiv);
-           });
-        
-                // Scroll to bottom
+                    }
+                    
+                    container.appendChild(messageDiv);
+                });
+                
                 container.scrollTop = container.scrollHeight;
-
-                // Update active state in sidebar
-                updateSidebarActiveState();
             }
+            
+            updateSidebarActiveState();
+            localStorage.setItem('prisikCurrentChatId', currentChatId);
         }
 
         function updateSidebarActiveState() {
-            // Remove active class from all chat items
             document.querySelectorAll('.chat-item').forEach(item => {
                 item.classList.remove('active');
             });
             
-            // Add active class to current chat
             const currentChatElement = document.getElementById(`chat-${currentChatId}`);
             if (currentChatElement) {
                 currentChatElement.classList.add('active');
@@ -663,6 +639,7 @@
             this.style.height = 'auto';
             this.style.height = Math.min(this.scrollHeight, 200) + 'px';
         });
+
         // Initialize app on page load
         window.addEventListener('DOMContentLoaded', initializeApp);
     </script>
