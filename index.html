@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/png" href="/Prisik-logo2.png">
     <title>Prisik- AI Chatbot</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+
     <style>
         * {
             margin: 0;
@@ -76,25 +80,127 @@
         }
 
         .chat-item {
-            padding: 10px 12px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
-            margin-bottom: 4px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            transition: background 0.2s;
-        }
+    padding: 10px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    margin-bottom: 4px;
+    transition: background 0.2s;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    position: relative;
+}
 
-        .chat-item:hover {
-            background: #2a2b32;
-        }
+.chat-item:hover {
+    background: #2a2b32;
+}
 
-        .chat-item.active {
-            background: #343541;
-        }
+.chat-item.active {
+    background: #343541;
+}
 
+.chat-title {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Editable title input */
+.chat-title-input {
+    flex: 1;
+    background: #40414f;
+    border: 1px solid #565869;
+    border-radius: 4px;
+    color: #ececf1;
+    padding: 4px 8px;
+    font-size: 14px;
+    font-family: inherit;
+    outline: none;
+}
+
+.chat-title-input:focus {
+    border-color: #8e8ea0;
+}
+
+/* 3-dot menu button */
+.chat-menu-btn {
+    background: transparent;
+    border: none;
+    color: #8e8ea0;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 18px;
+    opacity: 0;
+    transition: opacity 0.2s, background 0.2s;
+    line-height: 1;
+}
+
+.chat-item:hover .chat-menu-btn {
+    opacity: 1;
+}
+
+.chat-menu-btn:hover {
+    background: #40414f;
+}
+
+/* Dropdown menu */
+.chat-dropdown {
+    position: absolute;
+    right: 8px;
+    top: 100%;
+    background: #2a2b32;
+    border: 1px solid #40414f;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    z-index: 1000;
+    min-width: 150px;
+    margin-top: 4px;
+    display: none;
+}
+
+.chat-dropdown.show {
+    display: block;
+}
+
+.chat-dropdown-item {
+    padding: 10px 16px;
+    cursor: pointer;
+    font-size: 14px;
+    color: #ececf1;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: background 0.2s;
+    border: none;
+    background: transparent;
+    width: 100%;
+    text-align: left;
+}
+
+.chat-dropdown-item:first-child {
+    border-radius: 8px 8px 0 0;
+}
+
+.chat-dropdown-item:last-child {
+    border-radius: 0 0 8px 8px;
+}
+
+.chat-dropdown-item:hover {
+    background: #40414f;
+}
+
+.chat-dropdown-item.delete {
+    color: #ff6b6b;
+}
+
+.chat-dropdown-item.delete:hover {
+    background: #ff4444;
+    color: #ffffff;
+}
         /* Main Chat Area */
         .main {
             flex: 1;
@@ -315,6 +421,242 @@
         ::-webkit-scrollbar-thumb:hover {
             background: #ffffff;
         }
+        /* Model Selector */
+.model-selector {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.model-dropdown {
+    background: #40414f;
+    color: #ececf1;
+    border: 1px solid #565869;
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 14px;
+    cursor: pointer;
+    outline: none;
+    transition: border-color 0.2s, background 0.2s;
+    font-family: inherit;
+}
+
+.model-dropdown:hover {
+    background: #4a4b57;
+    border-color: #6e6e80;
+}
+
+.model-dropdown:focus {
+    border-color: #8e8ea0;
+}
+
+.model-dropdown optgroup {
+    background: #2a2b32;
+    color: #ececf1;
+    font-weight: 600;
+    padding: 8px;
+}
+
+.model-dropdown option {
+    background: #40414f;
+    color: #ececf1;
+    padding: 8px;
+}
+
+.model-dropdown option:hover {
+    background: #4a4b57;
+}
+/* Message content formatting */
+.message-content h1 {
+    font-size: 1.5em;
+    font-weight: 700;
+    margin: 16px 0 12px 0;
+    color: #ececf1;
+    border-bottom: 2px solid #40414f;
+    padding-bottom: 8px;
+}
+
+.message-content h2 {
+    font-size: 1.3em;
+    font-weight: 600;
+    margin: 14px 0 10px 0;
+    color: #ececf1;
+}
+
+.message-content h3 {
+    font-size: 1.1em;
+    font-weight: 600;
+    margin: 12px 0 8px 0;
+    color: #d1d1d1;
+}
+
+.message-content strong {
+    font-weight: 600;
+    color: #ececf1;
+}
+
+.message-content em {
+    font-style: italic;
+    color: #d1d1d1;
+}
+
+.message-content code.inline-code {
+    background: #2d2d2d;
+    color: #e06c75;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 0.9em;
+}
+
+.message-content pre {
+    background: #1e1e1e;
+    border: 1px solid #3d3d3d;
+    border-radius: 8px;
+    padding: 16px;
+    overflow-x: auto;
+    margin: 12px 0;
+}
+
+.message-content pre code {
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 14px;
+    line-height: 1.5;
+    color: #d4d4d4;
+    display: block;
+}
+
+.message-content ul {
+    margin: 12px 0;
+    padding-left: 24px;
+    list-style-type: disc;
+}
+
+.message-content ol {
+    margin: 12px 0;
+    padding-left: 24px;
+    list-style-type: decimal;
+}
+
+.message-content li {
+    margin: 6px 0;
+    line-height: 1.6;
+}
+
+.message-content blockquote {
+    border-left: 4px solid #565869;
+    padding-left: 16px;
+    margin: 12px 0;
+    color: #8e8ea0;
+    font-style: italic;
+}
+
+.message-content hr {
+    border: none;
+    border-top: 1px solid #40414f;
+    margin: 16px 0;
+}
+
+.message-content a {
+    color: #58a6ff;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.message-content a:hover {
+    color: #79b8ff;
+    text-decoration: underline;
+}
+
+.message-content p {
+    margin: 8px 0;
+}
+
+.message-content table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 16px 0;
+    background: #1e1e1e;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.message-content table th,
+.message-content table td {
+    border: 1px solid #3d3d3d;
+    padding: 10px 14px;
+    text-align: left;
+}
+
+.message-content table th {
+    background: #2d2d2d;
+    font-weight: 600;
+    color: #ececf1;
+    text-transform: uppercase;
+    font-size: 0.85em;
+    letter-spacing: 0.5px;
+}
+
+.message-content table td {
+    color: #d1d1d1;
+}
+
+.message-content table tr:nth-child(even) {
+    background: #1a1a1a;
+}
+
+.message-content table tr:hover {
+    background: #2a2a2a;
+}
+
+/* Better inline code styling */
+.message-content code.inline-code {
+    background: #2d2d2d;
+    color: #e06c75;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 0.88em;
+    border: 1px solid #3d3d3d;
+}
+
+/* Links in AI responses */
+.message-content a {
+    color: #58a6ff;
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: all 0.2s;
+}
+
+.message-content a:hover {
+    color: #79b8ff;
+    border-bottom-color: #79b8ff;
+}
+
+/* Streaming cursor animation */
+.streaming-cursor {
+    display: inline-block;
+    width: 2px;
+    height: 1em;
+    background: #ececf1;
+    margin-left: 2px;
+    animation: blink 1s infinite;
+    vertical-align: text-bottom;
+}
+
+@keyframes blink {
+    0%, 49% {
+        opacity: 1;
+    }
+    50%, 100% {
+        opacity: 0;
+    }
+}
+
+.message-content.streaming {
+    min-height: 20px;
+}
+
     </style>
 </head>
 <body>
@@ -335,8 +677,27 @@
         <!-- Main Chat -->
         <div class="main">
             <div class="chat-header">
-                <p style="font-size: 24px;">Prisik - AI Chatbot</p>
+              
+                <div class="model-selector">
+        <label for="modelSelect" style="font-size: 14px; color: #8e8ea0; margin-right: 8px;">Model:</label>
+        <select id="modelSelect" class="model-dropdown">
+            <optgroup label="Groq Models">
+                <option value="openai/gpt-oss-20b">OpenAI GPT-OSS 20B</option>
+                <option value="openai/gpt-oss-120b">OpenAI GPT-OSS 120B</option>
+                <option value="meta-llama/llama-guard-4-12b">Meta Llama Guard 4 12B</option>
+                <option value="moonshotai/kimi-k2-instruct-0905">MoonshotAI Kimi K2 Instruct 0905</option>
+              
+            </optgroup>
+            <optgroup label="Claude Models (Anthropic)">
+                <option value="claude-3-5-sonnet-20241022">Claude 3.5 Sonnet</option>
+                <option value="claude-3-5-haiku-20241022">Claude 3.5 Haiku</option>
+                <option value="claude-3-opus-20240229">Claude 3 Opus</option>
+            </optgroup>
+        </select>
+        </div>
+          <p style="font-size: 24px;">Prisik - AI Chatbot</p>
             </div>
+            
             
             <div class="messages-container" id="messagesContainer">
                 <div class="empty-state" id="emptyState">
@@ -365,11 +726,12 @@
 
     <script>
     
-        const API_URL = 'https://prisik-backend.onrender.com/chat';
+        const API_URL = 'http://127.0.0.1:8000/chat';
         
         let messages = [];
         let chatHistory = {};
         let currentChatId = null;
+        let selectedModel = 'openai/gpt-oss-20b'; // default model
 
         // Load chat history from localStorage on page load
         function initializeApp() {
@@ -394,24 +756,163 @@
         }
 
         function renderChatHistory() {
+            
             const historyContainer = document.getElementById('chatHistory');
             historyContainer.innerHTML = '';
-            
+    
             const sortedChatIds = Object.keys(chatHistory).sort((a, b) => b - a);
-            
+    
             sortedChatIds.forEach(chatId => {
-                const chat = chatHistory[chatId];
-                const chatItem = document.createElement('div');
-                chatItem.className = 'chat-item';
-                if (chatId == currentChatId) {
-                    chatItem.classList.add('active');
-                }
-                chatItem.id = `chat-${chatId}`;
-                chatItem.textContent = chat.title || 'New Chat';
-                chatItem.onclick = () => loadChat(chatId);
-                historyContainer.appendChild(chatItem);
-            });
+        const chat = chatHistory[chatId];
+        const chatItem = document.createElement('div');
+        chatItem.className = 'chat-item';
+        if (chatId == currentChatId) {
+            chatItem.classList.add('active');
         }
+        chatItem.id = `chat-${chatId}`;
+        
+        // Create chat title span
+        const titleSpan = document.createElement('span');
+        titleSpan.className = 'chat-title';
+        titleSpan.textContent = chat.title || 'New Chat';
+        titleSpan.onclick = () => loadChat(chatId);
+        
+        // Create 3-dot menu button
+        const menuBtn = document.createElement('button');
+        menuBtn.className = 'chat-menu-btn';
+        menuBtn.innerHTML = '⋯';
+        menuBtn.title = 'Options';
+        menuBtn.onclick = (e) => {
+            e.stopPropagation();
+            toggleChatMenu(chatId, e);
+        };
+        
+        // Create dropdown menu
+        const dropdown = document.createElement('div');
+        dropdown.className = 'chat-dropdown';
+        dropdown.id = `dropdown-${chatId}`;
+        
+        // Rename option
+        const renameOption = document.createElement('button');
+        renameOption.className = 'chat-dropdown-item';
+        renameOption.innerHTML = 'Rename';
+        renameOption.onclick = (e) => {
+            e.stopPropagation();
+            renameChat(chatId);
+            closeAllDropdowns();
+        };
+        
+        // Delete option
+        const deleteOption = document.createElement('button');
+        deleteOption.className = 'chat-dropdown-item delete';
+        deleteOption.innerHTML = 'Delete';
+        deleteOption.onclick = (e) => {
+            e.stopPropagation();
+            deleteChat(chatId);
+            closeAllDropdowns();
+        };
+        
+        dropdown.appendChild(renameOption);
+        dropdown.appendChild(deleteOption);
+        
+        chatItem.appendChild(titleSpan);
+        chatItem.appendChild(menuBtn);
+        chatItem.appendChild(dropdown);
+        historyContainer.appendChild(chatItem);
+    });
+}
+        // Toggle dropdown menu
+        function toggleChatMenu(chatId, event) {
+              const dropdown = document.getElementById(`dropdown-${chatId}`);
+              const allDropdowns = document.querySelectorAll('.chat-dropdown');
+    
+    // Close all other dropdowns
+    allDropdowns.forEach(dd => {
+        if (dd.id !== `dropdown-${chatId}`) {
+            dd.classList.remove('show');
+        }
+    });
+    
+    // Toggle current dropdown
+    dropdown.classList.toggle('show');
+}
+
+// Close all dropdowns
+function closeAllDropdowns() {
+    document.querySelectorAll('.chat-dropdown').forEach(dd => {
+        dd.classList.remove('show');
+    });
+}
+
+// Close dropdowns when clicking outside
+document.addEventListener('click', (e) => {
+    if (!e.target.closest('.chat-menu-btn') && !e.target.closest('.chat-dropdown')) {
+        closeAllDropdowns();
+    }
+});        
+        
+          function renameChat(chatId) {
+    const chatItem = document.getElementById(`chat-${chatId}`);
+    const titleSpan = chatItem.querySelector('.chat-title');
+    const currentTitle = chatHistory[chatId]?.title || 'New Chat';
+    
+    // Create input field
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'chat-title-input';
+    input.value = currentTitle;
+    
+    // Replace title with input
+    titleSpan.replaceWith(input);
+    input.focus();
+    input.select();
+    
+    // Save on Enter or blur
+    const saveRename = () => {
+        const newTitle = input.value.trim() || currentTitle;
+        
+        // Update chat history
+        chatHistory[chatId].title = newTitle;
+        saveToLocalStorage();
+        
+        // Re-render to show updated title
+        renderChatHistory();
+        
+        console.log('Chat renamed:', chatId, newTitle);
+    };
+    
+    input.addEventListener('blur', saveRename);
+    input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            saveRename();
+        } else if (e.key === 'Escape') {
+            renderChatHistory(); // Cancel rename
+        }
+    });
+}
+
+function deleteChat(chatId) {
+    // Confirm before deleting
+    if (!confirm('Delete this chat?\n\nThis action cannot be undone.')) {
+        return;
+    }
+    
+    // Delete from chatHistory object
+    delete chatHistory[chatId];
+    
+    // Save to localStorage
+    saveToLocalStorage();
+    
+    // If we're deleting the current chat, start a new one
+    if (chatId == currentChatId) {
+        newChat();
+    }
+    
+    // Re-render sidebar
+    renderChatHistory();
+    
+    console.log('Chat deleted:', chatId);
+}
 
         function handleKeyPress(e) {
             if (e.key === 'Enter' && !e.shiftKey) {
@@ -484,7 +985,7 @@
                     },
                     body: JSON.stringify({
                         msg: message,
-                        model: "openai/gpt-oss-20b",
+                        model: selectedModel,
                         system: "You are a helpful assistant.",
                         stream: false
                     })
@@ -507,7 +1008,7 @@
                 document.getElementById('messagesContainer').scrollTop = document.getElementById('messagesContainer').scrollHeight;
                 
                 messages.push({ role: 'assistant', content: assistantMessage });
-
+                setTimeout(() => highlightCode(), 100);
                 const firstUserMessage = messages.find(m => m.role === 'user')?.content || message;
                 const chatTitle = firstUserMessage.substring(0, 50) + (firstUserMessage.length > 50 ? '...' : '');
                 
@@ -539,12 +1040,125 @@
         }
 
         function formatMessage(text) {
-            text = text.replace(/```(\w+)?\n([\s\S]+?)```/g, '<pre><code>$2</code></pre>');
-            text = text.replace(/`([^`]+)`/g, '<code>$1</code>');
-            text = text.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
-            text = text.replace(/\n/g, '<br>');
-            return text;
+    if (!text) return '';
+    
+    // Store code blocks temporarily to prevent other formatting from affecting them
+    const codeBlocks = [];
+    text = text.replace(/```(\w+)?\n([\s\S]+?)```/g, function(match, lang, code) {
+        const index = codeBlocks.length;
+        codeBlocks.push(`<pre><code class="language-${lang || 'plaintext'}">${escapeHtml(code.trim())}</code></pre>`);
+        return `__CODE_BLOCK_${index}__`;
+    });
+    
+    // Store inline code temporarily
+    const inlineCodes = [];
+    text = text.replace(/`([^`]+)`/g, function(match, code) {
+        const index = inlineCodes.length;
+        inlineCodes.push(`<code class="inline-code">${escapeHtml(code)}</code>`);
+        return `__INLINE_CODE_${index}__`;
+    });
+    
+    // Escape remaining HTML
+    text = escapeHtml(text);
+    
+    // Restore code blocks and inline codes
+    codeBlocks.forEach((block, i) => {
+        text = text.replace(`__CODE_BLOCK_${i}__`, block);
+    });
+    inlineCodes.forEach((code, i) => {
+        text = text.replace(`__INLINE_CODE_${i}__`, code);
+    });
+    
+    // Tables (| Header | Header | format)
+    text = text.replace(/(\|[^\n]+\|\n)(\|[-:\s|]+\|\n)((?:\|[^\n]+\|\n?)+)/g, function(match, header, separator, rows) {
+        let table = '<table><thead><tr>';
+        
+        // Parse headers
+        const headers = header.split('|').filter(h => h.trim());
+        headers.forEach(h => {
+            table += `<th>${h.trim()}</th>`;
+        });
+        table += '</tr></thead><tbody>';
+        
+        // Parse rows
+        const rowLines = rows.trim().split('\n');
+        rowLines.forEach(row => {
+            const cells = row.split('|').filter(c => c.trim());
+            if (cells.length > 0) {
+                table += '<tr>';
+                cells.forEach(cell => {
+                    table += `<td>${cell.trim()}</td>`;
+                });
+                table += '</tr>';
+            }
+        });
+        
+        table += '</tbody></table>';
+        return table;
+    });
+    
+    // Headers
+    text = text.replace(/^### (.*$)/gm, '<h3>$1</h3>');
+    text = text.replace(/^## (.*$)/gm, '<h2>$1</h2>');
+    text = text.replace(/^# (.*$)/gm, '<h1>$1</h1>');
+    
+    // Bold
+    text = text.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+    text = text.replace(/__([^_]+)__/g, '<strong>$1</strong>');
+    
+    // Italic
+    text = text.replace(/\*([^*\n]+)\*/g, '<em>$1</em>');
+    text = text.replace(/_([^_\n]+)_/g, '<em>$1</em>');
+    
+    // Links [text](url)
+    text = text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+    
+    // Blockquotes
+    text = text.replace(/^&gt;\s+(.+)$/gm, '<blockquote>$1</blockquote>');
+    
+    // Horizontal rules
+    text = text.replace(/^(---|\*\*\*|___)$/gm, '<hr>');
+    
+    // Unordered lists
+    text = text.replace(/^\s*[-*+]\s+(.+)$/gm, '<li>$1</li>');
+    // Wrap consecutive <li> in <ul>
+    text = text.replace(/(<li>.*?<\/li>)(\s*<li>.*?<\/li>)*/g, function(match) {
+        return '<ul>' + match + '</ul>';
+    });
+    
+    // Ordered lists
+    text = text.replace(/^\s*(\d+)\.\s+(.+)$/gm, '<li>$2</li>');
+    
+    // Line breaks (but not inside other block elements)
+    text = text.replace(/\n/g, '<br>');
+    
+    // Clean up multiple <br> tags
+    text = text.replace(/(<br>\s*){3,}/g, '<br><br>');
+    
+    return text;
+}
+
+// Helper function to escape HTML
+function escapeHtml(text) {
+    const map = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;'
+    };
+    return text.replace(/[&<>"']/g, m => map[m]);
+}
+
+// Apply syntax highlighting to code blocks
+function highlightCode() {
+    document.querySelectorAll('pre code').forEach((block) => {
+        if (!block.dataset.highlighted) {
+            hljs.highlightElement(block);
+            block.dataset.highlighted = 'yes';
         }
+    });
+}
 
         function addTypingIndicator() {
             const container = document.getElementById('messagesContainer');
@@ -599,7 +1213,9 @@
                 messages.forEach(msg => {
                     const messageDiv = document.createElement('div');
                     messageDiv.className = `message ${msg.role}`;
-                    
+                
+                setTimeout(() => highlightCode(), 100);
+
                     if (msg.role === 'user') {
                         messageDiv.innerHTML = `
                             <div class="message-content">${formatMessage(msg.content)}</div>
@@ -640,8 +1256,31 @@
             this.style.height = Math.min(this.scrollHeight, 200) + 'px';
         });
 
+document.getElementById('modelSelect').addEventListener('change', function() {
+    selectedModel = this.value;
+    console.log('Model changed to:', selectedModel);
+    
+    // Save to localStorage so it persists
+    localStorage.setItem('selectedModel', selectedModel);
+});
+
+// Load saved model on page load
+function loadSavedModel() {
+    const savedModel = localStorage.getItem('selectedModel');
+    if (savedModel) {
+        selectedModel = savedModel;
+        document.getElementById('modelSelect').value = savedModel;
+        console.log('Loaded saved model:', savedModel);
+    }
+}
+
         // Initialize app on page load
-        window.addEventListener('DOMContentLoaded', initializeApp);
+        window.addEventListener('DOMContentLoaded',() => {
+    initializeApp();
+    loadSavedModel();
+});
+
+   
     </script>
 </body>
 </html>
